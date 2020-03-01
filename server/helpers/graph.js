@@ -10,12 +10,22 @@ module.exports = {
     }
   },
   generateError (err, complete = true) {
-    const error = {
+    let error = {
       succeeded: false,
-      errorCode: _.isFinite(err.code) ? err.code : 1,
-      slug: err.name,
-      message: err.message || 'An unexpected error occured.'
+      errorCode: 1,
+      slug: 'Unknown',
+      message: 'An unexpected error occured.'
     }
+
+    if (err !== null) {
+      error.errorCode = _.isFinite(err.code) ? err.code : 1
+      error.slug = err.name
+
+      if (error.message) {
+        error.message = err.message
+      }
+    }
+
     return (complete) ? { responseResult: error } : error
   }
 }
