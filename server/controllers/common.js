@@ -347,6 +347,13 @@ router.get(['/t', '/t/*'], (req, res, next) => {
 })
 
 /**
+ * Geolocation
+ */
+router.get(['/g', '/g/*'], (req, res, next) => {
+  _.set(res.locals, 'pageMeta.title', 'Geolocation')
+  res.render('geolocation')
+})
+/**
  * View document / asset
  */
 router.get('/*', async (req, res, next) => {

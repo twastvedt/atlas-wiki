@@ -167,6 +167,7 @@ Vue.component('tags', () => import(/* webpackChunkName: "tags" */ './components/
 Vue.component('unauthorized', () => import(/* webpackChunkName: "unauthorized" */ './components/unauthorized.vue'))
 Vue.component('v-card-chin', () => import(/* webpackPrefetch: true, webpackChunkName: "ui-extra" */ './components/common/v-card-chin.vue'))
 Vue.component('welcome', () => import(/* webpackChunkName: "welcome" */ './components/welcome.vue'))
+Vue.component('geolocation', () => import(/* webpackChunkName: "geolocation" */ './components/geolocation.vue'))
 
 Vue.component('nav-footer', () => import(/* webpackChunkName: "theme-page"  */ './themes/' + process.env.CURRENT_THEME + '/components/nav-footer.vue'))
 Vue.component('nav-sidebar', () => import(/* webpackChunkName: "theme-page" */ './themes/' + process.env.CURRENT_THEME + '/components/nav-sidebar.vue'))

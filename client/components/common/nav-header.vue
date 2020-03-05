@@ -73,6 +73,12 @@
                 v-btn.ml-2.mr-0(icon, v-on='on', href='/t')
                   v-icon(color='grey') mdi-tag-multiple
               span {{$t('common:header.browseTags')}}
+
+            v-tooltip(bottom)
+              template(v-slot:activator='{ on }')
+                v-btn.ml-2.mr-0(icon, v-on='on', href='/g')
+                  v-icon(color='grey') mdi-earth
+              span {{$t('common:header.browseGeo')}}
       v-flex(xs6, md4)
         v-toolbar.nav-header-inner.pr-4(color='black', dark, flat)
           v-spacer

@@ -13,6 +13,8 @@ switch (window.document.documentElement.lang) {
 
 require('./scss/app.scss')
 require('./themes/' + process.env.CURRENT_THEME + '/scss/app.scss')
+require('leaflet/dist/leaflet.css')
+require('leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.webpack.css')
 
 require('@mdi/font/css/materialdesignicons.css')
 
