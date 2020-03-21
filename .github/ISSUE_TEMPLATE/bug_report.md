@@ -1,14 +1,14 @@
 ---
 name: Bug report
-about: Create a report to help us improve Wiki.js
+about: Create a report to help us improve Atlas
 title: ''
 labels: ''
-assignees: NGPixel
+assignees: ''
 
 ---
 
 **Describe the bug**
-A clear and concise description of what the bug is.
+A clear and concise description of what the bug is. Is this a bug with Atlas and not Wiki.js?
 
 **To Reproduce**
 Steps to reproduce the behavior:
