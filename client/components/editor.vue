@@ -2,10 +2,20 @@
   v-app.editor(:dark='darkMode')
     nav-header(dense)
       template(slot='mid')
-        v-spacer
-        .subtitle-1.grey--text {{currentPageTitle}}
-        v-spacer
+        v-text-field.editor-title-input(
+          dark
+          solo
+          flat
+          v-model='currentPageTitle'
+          hide-details
+          background-color='black'
+          dense
+          full-width
+        )
       template(slot='actions')
+        v-btn.mr-3.animated.fadeIn(color='amber', outlined, small, v-if='isConflict')
+          .overline.amber--text.mr-3 Conflict
+          status-indicator(intermediary, pulse)
         v-btn.animated.fadeInDown(
           text
           color='green'
@@ -48,9 +58,11 @@
 
 <script>
 import _ from 'lodash'
+import gql from 'graphql-tag'
 import { get, sync } from 'vuex-pathify'
 import { AtomSpinner } from 'epic-spinners'
 import { Base64 } from 'js-base64'
+import { StatusIndicator } from 'vue-status-indicator'
 
 import createPageMutation from 'gql/editor/create.gql'
 import updatePageMutation from 'gql/editor/update.gql'
@@ -65,6 +77,7 @@ export default {
   i18nOptions: { namespaces: 'editor' },
   components: {
     AtomSpinner,
+    StatusIndicator,
     editorApi: () => import(/* webpackChunkName: "editor-api", webpackMode: "lazy" */ './editor/editor-api.vue'),
     editorCode: () => import(/* webpackChunkName: "editor-code", webpackMode: "lazy" */ './editor/editor-code.vue'),
     editorCkeditor: () => import(/* webpackChunkName: "editor-ckeditor", webpackMode: "lazy" */ './editor/editor-ckeditor.vue'),
@@ -115,10 +128,15 @@ export default {
     pageId: {
       type: Number,
       default: 0
+    },
+    checkoutDate: {
+      type: String,
+      default: new Date().toISOString()
     }
   },
   data() {
     return {
+      isConflict: false,
       dialogProps: false,
       dialogProgress: false,
       dialogEditorSelector: false,
@@ -133,7 +151,7 @@ export default {
     activeModal: sync('editor/activeModal'),
     mode: get('editor/mode'),
     welcomeMode() { return this.mode === `create` && this.path === `home` },
-    currentPageTitle: get('page/title'),
+    currentPageTitle: sync('page/title'),
     isDirty () {
       return _.some([
         this.initContentParsed !== this.$store.get('editor/content'),
@@ -171,7 +189,7 @@ export default {
 
     this.initContentParsed = this.initContent ? Base64.decode(this.initContent) : ''
     this.$store.set('editor/content', this.initContentParsed)
-    if (this.mode === 'create') {
+    if (this.mode === 'create' && !this.initEditor) {
       _.delay(() => {
         this.dialogEditorSelector = true
       }, 500)
@@ -315,6 +333,29 @@ export default {
         }
       }, 500)
     }
+  },
+  apollo: {
+    isConflict: {
+      query: gql`
+        query ($id: Int!, $checkoutDate: Date!) {
+          pages {
+            checkConflicts(id: $id, checkoutDate: $checkoutDate)
+          }
+        }
+      `,
+      fetchPolicy: 'network-only',
+      pollInterval: 5000,
+      variables () {
+        return {
+          id: this.pageId,
+          checkoutDate: this.checkoutDate
+        }
+      },
+      update: (data) => _.cloneDeep(data.pages.checkConflicts),
+      skip () {
+        return this.mode === 'create' || !this.isDirty
+      }
+    }
   }
 }
 </script>
@@ -327,6 +368,10 @@ export default {
 
     .application--wrap {
       background-color: mc('grey', '900');
+    }
+
+    &-title-input input {
+      text-align: center;
     }
   }
 
