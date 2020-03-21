@@ -16,7 +16,6 @@
                 v-icon(v-else) mdi-checkbox-blank-outline
               v-list-item-title {{tag.title}}
     v-content.grey(:class='$vuetify.theme.dark ? `darken-4-d5` : `lighten-3`')
-      span First marker is placed at {{ withPopup.lat }}, {{ withPopup.lng }}
       span Center is at {{ currentCenter }} and the zoom is: {{ currentZoom }}
 
       v-btn.mt-5(@click="showLongText") Toggle long popup
@@ -25,8 +24,7 @@
 
       l-map(
         v-if="showMap"
-        :zoom="zoom"
-        :center="center"
+        :bounds="fitBounds"
         :options="mapOptions"
         style="height: 80%"
         @update:center="centerUpdate"
@@ -36,16 +34,9 @@
           :url="url"
           :attribution="attribution"
         )
-        l-marker(:lat-lng="withPopup")
+        l-marker(v-for="page in pages" :key="page.id" :lat-lng='latLng(page)')
           l-popup
             div(@click="innerClick") I am a popup
-              p(v-show="showParagraph")
-                | Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque
-                | sed pretium nisl, ut sagittis sapien. Sed vel sollicitudin nisi.
-                | Donec finibus semper metus id malesuada.
-        l-marker(:lat-lng="withTooltip")
-          l-tooltip(:options="{ permanent: true, interactive: true }")
-            div(@click="innerClick") I am a tooltip
               p(v-show="showParagraph")
                 | Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque
                 | sed pretium nisl, ut sagittis sapien. Sed vel sollicitudin nisi.
@@ -63,20 +54,9 @@ import _ from 'lodash'
 import tagsQuery from 'gql/common/common-pages-query-tags.gql'
 import pagesQuery from 'gql/common/common-pages-query-list.gql'
 
-import { latLng, Icon } from 'leaflet'
+import L from 'leaflet'
 import { LMap, LTileLayer, LMarker, LPopup, LTooltip } from 'vue2-leaflet'
 import 'leaflet-defaulticon-compatibility'
-
-// ====================================
-// Fix Leaflet Icons
-// ====================================
-
-// delete Icon.Default.prototype._getIconUrl
-// Icon.Default.mergeOptions({
-//   iconRetinaUrl: require('leaflet/dist/images/marker-icon-2x.png'),
-//   iconUrl: require('leaflet/dist/images/marker-icon.png'),
-//   shadowUrl: require('leaflet/dist/images/marker-shadow.png')
-// })
 
 /* global siteLangs */
 
@@ -124,15 +104,11 @@ export default {
           }
         }
       },
-      zoom: 13,
-      center: latLng(47.41322, -1.219482),
       url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
       attribution:
         '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
-      withPopup: latLng(47.41322, -1.219482),
-      withTooltip: latLng(47.41422, -1.250482),
       currentZoom: 11.5,
-      currentCenter: latLng(47.41322, -1.219482),
+      currentCenter: L.latLng(47.41322, -1.219482),
       showParagraph: false,
       mapOptions: {
         zoomSnap: 0.5
@@ -147,6 +123,17 @@ export default {
     },
     tagsGrouped () {
       return _.groupBy(this.tags, t => t.title.charAt(0).toUpperCase())
+    },
+    fitBounds () {
+      if (this.pages) {
+        if (this.pages.length === 1) {
+          return L.latLngBounds(L.latLng(this.pages.latitude - 10, this.pages.longitude - 10), L.latLng(this.pages.latitude + 10, this.pages.longitude + 10))
+        } else if (this.pages.length > 1) {
+          return L.latLngBounds(this.pages.map(page => L.latLng(page.latitude, page.latitude)))
+        }
+      }
+
+      return null
     }
   },
   watch: {
@@ -159,7 +146,7 @@ export default {
     this.$store.commit('page/SET_MODE', 'geolocation')
 
     this.locales = _.concat(
-      [{name: this.$t('tags:localeAny'), code: 'any'}],
+      [{name: this.$t('geo:localeAny'), code: 'any'}],
       (siteLangs.length > 0 ? siteLangs : [])
     )
 
@@ -206,6 +193,9 @@ export default {
     },
     innerClick() {
       alert('Click!')
+    },
+    latLng(page) {
+      return L.latLng(page.latitude, page.longitude)
     }
   },
   apollo: {
@@ -230,9 +220,6 @@ export default {
           locale: this.locale === 'any' ? null : this.locale,
           tags: this.selection
         }
-      },
-      skip () {
-        return this.selection.length < 1
       }
     }
   }
