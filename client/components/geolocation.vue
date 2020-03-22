@@ -34,13 +34,9 @@
           :url="url"
           :attribution="attribution"
         )
-        l-marker(v-for="page in pages" :key="page.id" :lat-lng='latLng(page)')
-          l-popup
-            div(@click="innerClick") I am a popup
-              p(v-show="showParagraph")
-                | Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque
-                | sed pretium nisl, ut sagittis sapien. Sed vel sollicitudin nisi.
-                | Donec finibus semper metus id malesuada.
+        l-geo-json(
+          :geojson="geojson"
+        )
 
     nav-footer
     notify
@@ -53,6 +49,7 @@ import _ from 'lodash'
 
 import tagsQuery from 'gql/common/common-pages-query-tags.gql'
 import pagesQuery from 'gql/common/common-pages-query-list.gql'
+import featuresQuery from 'gql/common/common-features-query-list.gql'
 
 import L from 'leaflet'
 import { LMap, LTileLayer, LMarker, LPopup, LTooltip } from 'vue2-leaflet'
@@ -82,6 +79,7 @@ export default {
       locale: 'any',
       locales: [],
       pages: [],
+      features: [],
       isLoading: true,
       scrollStyle: {
         vuescroll: {},
@@ -124,16 +122,8 @@ export default {
     tagsGrouped () {
       return _.groupBy(this.tags, t => t.title.charAt(0).toUpperCase())
     },
-    fitBounds () {
-      if (this.pages) {
-        if (this.pages.length === 1) {
-          return L.latLngBounds(L.latLng(this.pages.latitude - 10, this.pages.longitude - 10), L.latLng(this.pages.latitude + 10, this.pages.longitude + 10))
-        } else if (this.pages.length > 1) {
-          return L.latLngBounds(this.pages.map(page => L.latLng(page.latitude, page.latitude)))
-        }
-      }
-
-      return null
+    geojson() {
+      return _.map(this.features, (feature) => feature.geojson)
     }
   },
   watch: {
@@ -193,9 +183,6 @@ export default {
     },
     innerClick() {
       alert('Click!')
-    },
-    latLng(page) {
-      return L.latLng(page.latitude, page.longitude)
     }
   },
   apollo: {
@@ -220,6 +207,15 @@ export default {
           locale: this.locale === 'any' ? null : this.locale,
           tags: this.selection
         }
+      }
+    },
+    features: {
+      query: featuresQuery,
+      fetchPolicy: 'cache-and-network',
+      update: (data) => _.cloneDeep(data.features.list),
+      watchLoading (isLoading) {
+        this.isLoading = isLoading
+        this.$store.commit(`loading${isLoading ? 'Start' : 'Stop'}`, 'pages-refresh')
       }
     }
   }

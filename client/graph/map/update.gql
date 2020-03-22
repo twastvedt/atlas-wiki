@@ -1,0 +1,11 @@
+mutation ($id: Int!, $title: String!, $description: String!, $geojson: String!, $parentId: Int, ) {
+  features {
+    update(title: $title, description: $description, geojson: $geojson, parentId: $parentId) {
+      responseResult {
+        succeeded
+        errorCode
+        message
+      }
+    }
+  }
+}

@@ -1,0 +1,62 @@
+# ===============================================
+# FEATURES
+# ===============================================
+
+extend type Query {
+  features: FeatureQuery
+}
+
+extend type Mutation {
+  features: FeatureMutation
+}
+
+# -----------------------------------------------
+# QUERIES
+# -----------------------------------------------
+
+type FeatureQuery {
+  list(
+    parentId: Int
+  ): [Feature] @auth(requires: ["manage:system", "read:features"])
+  single(
+    id: Int!
+  ): Feature @auth(requires: ["manage:system", "read:features"])
+}
+
+# -----------------------------------------------
+# MUTATIONS
+# -----------------------------------------------
+
+type FeatureMutation {
+  create(
+    title: String!
+    geojson: String!
+  ): DefaultResponse @auth(requires: ["manage:system", "write:features", "manage:features"])
+
+  update(
+    id: Int!
+    parentId: Int
+    title: String
+    description: String
+    geojson: String
+  ): DefaultResponse @auth(requires: ["manage:system", "write:features", "manage:features"])
+
+  delete(
+    id: Int!
+  ): DefaultResponse @auth(requires: ["manage:system", "manage:features"])
+}
+
+# -----------------------------------------------
+# TYPES
+# -----------------------------------------------
+
+type Feature {
+  id: Int!
+  parentId: Int
+  title: String!
+  description: String
+  geojson: String!
+  createdAt: Date!
+  updatedAt: Date!
+  author: User
+}
