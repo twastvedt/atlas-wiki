@@ -16,12 +16,6 @@
                 v-icon(v-else) mdi-checkbox-blank-outline
               v-list-item-title {{tag.title}}
     v-content.grey(:class='$vuetify.theme.dark ? `darken-4-d5` : `lighten-3`')
-      span Center is at {{ currentCenter }} and the zoom is: {{ currentZoom }}
-
-      v-btn.mt-5(@click="showLongText") Toggle long popup
-
-      v-btn.mt-5(@click="showMap = !showMap") Toggle map
-
       l-map(
         v-if="showMap"
         :bounds="fitBounds"
@@ -29,6 +23,7 @@
         style="height: 80%"
         @update:center="centerUpdate"
         @update:zoom="zoomUpdate"
+        ref="map"
         )
         l-tile-layer(
           :url="url"
@@ -36,6 +31,7 @@
         )
         l-geo-json(
           :geojson="geojson"
+          ref="features"
         )
 
     nav-footer
@@ -52,7 +48,7 @@ import pagesQuery from 'gql/common/common-pages-query-list.gql'
 import featuresQuery from 'gql/common/common-features-query-list.gql'
 
 import L from 'leaflet'
-import { LMap, LTileLayer, LMarker, LPopup, LTooltip } from 'vue2-leaflet'
+import { LMap, LTileLayer, LMarker, LPopup, LTooltip, LGeoJson } from 'vue2-leaflet'
 import 'leaflet-defaulticon-compatibility'
 
 /* global siteLangs */
@@ -69,7 +65,8 @@ export default {
     LTileLayer,
     LMarker,
     LPopup,
-    LTooltip
+    LTooltip,
+    LGeoJson
   },
   data() {
     return {
@@ -124,6 +121,9 @@ export default {
     },
     geojson() {
       return _.map(this.features, (feature) => feature.geojson)
+    },
+    fitBounds() {
+      return this.$refs.features?.mapObject?.getBounds()
     }
   },
   watch: {
