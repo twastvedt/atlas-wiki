@@ -1,8 +1,10 @@
+import { GraphQLJSONObject } from 'graphql-type-json'
 const graphHelper = require('../../helpers/graph')
 
 /* global WIKI */
 
 module.exports = {
+  JSONObject: GraphQLJSONObject,
   Query: {
     async features() { return {} }
   },

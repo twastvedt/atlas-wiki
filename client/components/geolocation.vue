@@ -159,7 +159,7 @@ export default {
       })
 
       map.on('pm:create', e => {
-        this.create(e.layer)
+        this.create(e.layer.toGeoJSON())
       })
     })
   },

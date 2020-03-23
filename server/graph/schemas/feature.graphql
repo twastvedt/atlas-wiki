@@ -1,3 +1,5 @@
+scalar JSONObject
+
 # ===============================================
 # FEATURES
 # ===============================================
@@ -30,9 +32,9 @@ type FeatureQuery {
 type FeatureMutation {
   create(
     parentId: Int
-    title: String!
+    title: String
     description: String
-    geojson: String!
+    geojson: JSONObject!
   ): DefaultResponse @auth(requires: ["manage:system", "write:features", "manage:features"])
 
   update(
@@ -40,7 +42,7 @@ type FeatureMutation {
     parentId: Int
     title: String
     description: String
-    geojson: String
+    geojson: JSONObject
   ): DefaultResponse @auth(requires: ["manage:system", "write:features", "manage:features"])
 
   delete(
@@ -57,7 +59,7 @@ type Feature {
   parentId: Int
   title: String!
   description: String
-  geojson: String!
+  geojson: JSONObject!
   createdAt: Date!
   updatedAt: Date!
 }

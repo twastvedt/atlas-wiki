@@ -85,6 +85,7 @@
     "graphql-rate-limit-directive": "1.2.1",
     "graphql-subscriptions": "1.1.0",
     "graphql-tools": "4.0.7",
+    "graphql-type-json": "0.3.1",
     "he": "1.2.0",
     "highlight.js": "9.18.1",
     "i18next": "19.3.2",
