@@ -1,4 +1,4 @@
-mutation ($title: String!, $description: String!, $geojson: String!, $parentId: Int, ) {
+mutation ($title: String, $description: String!, $geojson: String!, $parentId: Int, ) {
   features {
     create(title: $title, description: $description, geojson: $geojson, parentId: $parentId) {
       responseResult {
