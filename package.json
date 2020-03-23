@@ -40,6 +40,7 @@
     "@azure/storage-blob": "12.1.1",
     "@bugsnag/js": "6.5.2",
     "@exlinc/keycloak-passport": "1.0.2",
+    "@geoman-io/leaflet-geoman-free": "2.5.0",
     "@root/csr": "0.8.1",
     "@root/keypairs": "0.9.0",
     "@root/pem": "1.0.4",

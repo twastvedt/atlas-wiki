@@ -34,6 +34,7 @@
           ref="features"
         )
 
+    loader(v-model='dialogProgress', :title='$t(`editor:save.processing`)', :subtitle='$t(`editor:save.pleaseWait`)')
     nav-footer
     notify
 </template>
@@ -47,10 +48,14 @@ import tagsQuery from 'gql/common/common-pages-query-tags.gql'
 import pagesQuery from 'gql/common/common-pages-query-list.gql'
 import featuresQuery from 'gql/common/common-features-query-list.gql'
 
+import createFeatureMutation from 'gql/map/create.gql'
+
 import L from 'leaflet'
 import { LMap, LTileLayer, LMarker, LPopup, LTooltip, LGeoJson } from 'vue2-leaflet'
 import 'leaflet-defaulticon-compatibility'
 
+import '@geoman-io/leaflet-geoman-free'
+import '@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css'
 /* global siteLangs */
 
 const router = new VueRouter({
@@ -77,6 +82,7 @@ export default {
       locales: [],
       pages: [],
       features: [],
+      dialogProgress: false,
       isLoading: true,
       scrollStyle: {
         vuescroll: {},
@@ -142,6 +148,21 @@ export default {
 
     this.selection = _.compact(this.$route.path.split('/'))
   },
+  mounted () {
+    this.$nextTick(() => {
+      const map = this.$refs.map.mapObject
+
+      map.pm.addControls({
+        position: 'topleft',
+        drawCircle: false,
+        cutPolygon: false
+      })
+
+      map.on('pm:create', e => {
+        this.create(e.layer)
+      })
+    })
+  },
   methods: {
     toggleTag (tag) {
       if (_.includes(this.selection, tag)) {
@@ -181,8 +202,34 @@ export default {
     showLongText() {
       this.showParagraph = !this.showParagraph
     },
-    innerClick() {
-      alert('Click!')
+    showProgressDialog(textKey) {
+      this.dialogProgress = true
+    },
+    hideProgressDialog() {
+      this.dialogProgress = false
+    },
+    async create(geojson) {
+      this.showProgressDialog('saving')
+      try {
+        let resp = await this.$apollo.mutate({
+          mutation: createFeatureMutation,
+          variables: {
+            geojson
+          }
+        })
+        resp = _.get(resp, 'data.features.create', {})
+        if (!_.get(resp, 'responseResult.succeeded')) {
+          throw new Error(_.get(resp, 'responseResult.message'))
+        }
+      } catch (err) {
+        this.$store.commit('showNotification', {
+          message: err.message,
+          style: 'error',
+          icon: 'warning'
+        })
+        throw err
+      }
+      this.hideProgressDialog()
     }
   },
   apollo: {
