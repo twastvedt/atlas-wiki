@@ -1,6 +1,6 @@
 query ($parentId: Int) {
   features {
-    list(parentId: Int) {
+    list(parentId: $parentId) {
       id
       parentId
       title

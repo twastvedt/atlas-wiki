@@ -29,7 +29,9 @@ type FeatureQuery {
 
 type FeatureMutation {
   create(
+    parentId: Int
     title: String!
+    description: String
     geojson: String!
   ): DefaultResponse @auth(requires: ["manage:system", "write:features", "manage:features"])
 
@@ -58,5 +60,4 @@ type Feature {
   geojson: String!
   createdAt: Date!
   updatedAt: Date!
-  author: User
 }
