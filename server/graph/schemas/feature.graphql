@@ -57,7 +57,7 @@ type FeatureMutation {
 type Feature {
   id: Int!
   parentId: Int
-  title: String!
+  title: String
   description: String
   geojson: JSONObject!
   createdAt: Date!

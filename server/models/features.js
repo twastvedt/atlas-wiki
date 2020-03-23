@@ -65,9 +65,6 @@ module.exports = class Feature extends Model {
       geojson: {
         presence: {
           allowEmpty: false
-        },
-        length: {
-          minimum: 2
         }
       }
     }, { format: 'flat' })

@@ -1,4 +1,4 @@
-import { GraphQLJSONObject } from 'graphql-type-json'
+const GraphQLJSONObject = require('graphql-type-json').GraphQLJSONObject
 const graphHelper = require('../../helpers/graph')
 
 /* global WIKI */
