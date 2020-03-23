@@ -89,6 +89,18 @@ module.exports = {
     message: 'Too many attempts! Try again later.',
     code: 1008
   }),
+  FeatureParentDoesNotExist: CustomError('FeatureParentDoesNotExist', {
+    message: 'Specified parent feature id does not exist.',
+    code: 31001
+  }),
+  FeatureNotFound: CustomError('FeatureNotFound', {
+    message: 'This feature does not exist.',
+    code: 31002
+  }),
+  FeatureDeleteForeignConstraint: CustomError('FeatureDeletionFailed', {
+    message: 'Cannot delete feature because of content relational constraints.',
+    code: 31003
+  }),
   InputInvalid: CustomError('InputInvalid', {
     message: 'Input data is invalid.',
     code: 1012

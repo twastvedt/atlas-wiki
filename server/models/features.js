@@ -2,6 +2,8 @@
 
 const Model = require('objection').Model
 const moment = require('moment')
+const validate = require('validate.js')
+const _ = require('lodash')
 
 /**
  * Feature model
@@ -40,5 +42,99 @@ module.exports = class Feature extends Model {
 
     this.createdAt = moment.utc().toISOString()
     this.updatedAt = moment.utc().toISOString()
+  }
+
+  /**
+   * Create a new feature
+   *
+   * @param {Object} param0 Feature Fields
+   */
+  static async createNewFeature ({ parentId, title, description, geojson }) {
+    // Input validation
+    let validation = null
+
+    validation = validate({
+      title,
+      geojson
+    }, {
+      title: {
+        length: {
+          maximum: 255
+        }
+      },
+      geojson: {
+        presence: {
+          allowEmpty: false
+        },
+        length: {
+          minimum: 2
+        }
+      }
+    }, { format: 'flat' })
+
+    if (validation && validation.length > 0) {
+      throw new WIKI.Error.InputInvalid(validation[0])
+    }
+
+    // Check if parent feature exists
+    if (parentId) {
+      const parentFeature = await WIKI.models.features.query().findOne({ parentId })
+
+      if (!parentFeature) {
+        throw new WIKI.Error.FeatureParentDoesNotExist()
+      }
+    }
+
+    // Create the feature
+    let newFeatureData = {
+      parentId,
+      title,
+      description,
+      geojson
+    }
+
+    await WIKI.models.features.query().insert(newFeatureData)
+  }
+
+  /**
+   * Update an existing feature
+   *
+   * @param {Object} param0 Feature ID and fields to update
+   */
+
+  static async updateFeature ({ id, parentId, title, description, geojson }) {
+    const feature = await WIKI.models.features.query().findById(id)
+    if (feature) {
+      let featureData = {}
+      if (!_.isEmpty(parentId) && parentId !== feature.parentId) {
+        featureData.parentId = parentId
+      }
+      if (!_.isEmpty(title) && title !== feature.title) {
+        featureData.title = _.trim(title)
+      }
+      if (!_.isEmpty(geojson)) {
+        featureData.geojson = geojson
+      }
+      if (description !== null) {
+        featureData.description = description
+      }
+      await WIKI.models.features.query().patch(featureData).findById(id)
+    } else {
+      throw new WIKI.Error.FeatureNotFound()
+    }
+  }
+
+  /**
+   * Delete a Feature
+   *
+   * @param {*} id Feature ID
+   */
+  static async deleteFeature (id) {
+    const feature = await WIKI.models.features.query().findById(id)
+    if (feature) {
+      await WIKI.models.features.query().deleteById(id)
+    } else {
+      throw new WIKI.Error.FeatureNotFound()
+    }
   }
 }
