@@ -69,7 +69,7 @@ module.exports = {
     },
     async update (obj, args) {
       try {
-        await WIKI.models.users.updateFeature(args)
+        await WIKI.models.features.updateFeature(args)
 
         return {
           responseResult: graphHelper.generateSuccess('Feature created successfully')

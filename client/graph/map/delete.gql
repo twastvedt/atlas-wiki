@@ -1,0 +1,11 @@
+mutation ($id: Int!) {
+  features {
+    delete(id: $id) {
+      responseResult {
+        succeeded
+        errorCode
+        message
+      }
+    }
+  }
+}

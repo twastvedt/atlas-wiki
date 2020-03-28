@@ -49,6 +49,8 @@ import pagesQuery from 'gql/common/common-pages-query-list.gql'
 import featuresQuery from 'gql/common/common-features-query-list.gql'
 
 import createFeatureMutation from 'gql/map/create.gql'
+import updateFeatureMutation from 'gql/map/update.gql'
+import deleteFeatureMutation from 'gql/map/delete.gql'
 
 import L from 'leaflet'
 import { LMap, LTileLayer, LMarker, LPopup, LTooltip, LGeoJson } from 'vue2-leaflet'
@@ -157,7 +159,18 @@ export default {
 
       map.on('pm:create', e => {
         this.create(e.layer.toGeoJSON())
+
+        // listen to changes on the new layer
+        e.layer.on('pm:update', this.update)
+        e.layer.on('pm:dragend', this.update)
       })
+
+      map.on('pm:remove', e => {
+        this.delete(e.layer.feature.properties.id)
+      })
+
+      this.$refs.features.mapObject.on('pm:update', this.update)
+      this.$refs.features.mapObject.on('pm:dragend', this.update)
     })
   },
   methods: {
@@ -215,6 +228,58 @@ export default {
           }
         })
         resp = _.get(resp, 'data.features.create', {})
+        if (!_.get(resp, 'responseResult.succeeded')) {
+          throw new Error(_.get(resp, 'responseResult.message'))
+        }
+      } catch (err) {
+        this.$store.commit('showNotification', {
+          message: err.message,
+          style: 'error',
+          icon: 'warning'
+        })
+        throw err
+      }
+      this.hideProgressDialog()
+    },
+    async update(event) {
+      this.showProgressDialog('saving')
+      try {
+        const data = _.clone(event.sourceTarget.toGeoJSON())
+        data.properties = _.cloneDeep(data.properties)
+
+        delete data.properties.id
+
+        let resp = await this.$apollo.mutate({
+          mutation: updateFeatureMutation,
+          variables: {
+            id: event.sourceTarget.feature.properties.id,
+            geojson: data
+          }
+        })
+        resp = _.get(resp, 'data.features.update', {})
+        if (!_.get(resp, 'responseResult.succeeded')) {
+          throw new Error(_.get(resp, 'responseResult.message'))
+        }
+      } catch (err) {
+        this.$store.commit('showNotification', {
+          message: err.message,
+          style: 'error',
+          icon: 'warning'
+        })
+        throw err
+      }
+      this.hideProgressDialog()
+    },
+    async delete(id) {
+      this.showProgressDialog('saving')
+      try {
+        let resp = await this.$apollo.mutate({
+          mutation: deleteFeatureMutation,
+          variables: {
+            id
+          }
+        })
+        resp = _.get(resp, 'data.features.delete', {})
         if (!_.get(resp, 'responseResult.succeeded')) {
           throw new Error(_.get(resp, 'responseResult.message'))
         }
