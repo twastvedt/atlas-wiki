@@ -1,13 +1,11 @@
 query ($parentId: Int) {
   features {
     list(parentId: $parentId) {
-      id
-      parentId
-      title
-      description
-      geojson
-      createdAt
-      updatedAt
+      type
+      geometry
+      properties {
+        id
+      }
     }
   }
 }

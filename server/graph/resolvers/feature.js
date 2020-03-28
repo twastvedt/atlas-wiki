@@ -1,7 +1,20 @@
 const GraphQLJSONObject = require('graphql-type-json').GraphQLJSONObject
 const graphHelper = require('../../helpers/graph')
+const _ = require('lodash')
 
 /* global WIKI */
+
+function formatFeature(feature) {
+  if (!feature.geojson.properties) {
+    feature.geojson.properties = _.clone(feature)
+  } else {
+    _.extend(feature.geojson.properties, feature)
+  }
+
+  delete feature.geojson.properties.geojson
+
+  return feature.geojson
+}
 
 module.exports = {
   JSONObject: GraphQLJSONObject,
@@ -13,17 +26,19 @@ module.exports = {
   },
   FeatureQuery: {
     async list(obj, args, context, info) {
-      return WIKI.models.features.query()
+      const results = await WIKI.models.features.query()
         .select('id', 'parentId', 'title', 'description', 'geojson', 'createdAt', 'updatedAt')
         .modify(queryBuilder => {
           if (args.parentId) {
             queryBuilder.where('parentId', args.parentId)
           }
         })
+
+      return results.map(formatFeature)
     },
     async single(obj, args, context, info) {
-      let usr = await WIKI.models.features.query().findById(args.id)
-      return usr
+      let feature = await WIKI.models.features.query().findById(args.id)
+      return formatFeature(feature)
     }
   },
   FeatureMutation: {

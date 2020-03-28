@@ -30,7 +30,7 @@
           :attribution="attribution"
         )
         l-geo-json(
-          :geojson="geojson"
+          :geojson="features"
           ref="features"
         )
 
@@ -124,9 +124,6 @@ export default {
     },
     tagsGrouped () {
       return _.groupBy(this.tags, t => t.title.charAt(0).toUpperCase())
-    },
-    geojson() {
-      return _.map(this.features, (feature) => feature.geojson)
     },
     fitBounds() {
       return this.$refs.features?.mapObject?.getBounds()
