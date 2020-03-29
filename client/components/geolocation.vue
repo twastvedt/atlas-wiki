@@ -169,6 +169,12 @@ export default {
         this.delete(e.layer.feature.properties.id)
       })
 
+      map.on('layeradd', e => {
+        if (e.layer.feature) {
+          e.layer.bindPopup(`<div>${e.layer.feature.properties.id}</div>`)
+        }
+      })
+
       this.$refs.features.mapObject.on('pm:update', this.update)
       this.$refs.features.mapObject.on('pm:dragend', this.update)
     })
