@@ -17,21 +17,20 @@
               v-list-item-title {{tag.title}}
     v-content.grey(:class='$vuetify.theme.dark ? `darken-4-d5` : `lighten-3`')
       l-map(
-        v-if="showMap"
-        :bounds="fitBounds"
-        :options="mapOptions"
-        style="height: 80%"
-        @update:center="centerUpdate"
-        @update:zoom="zoomUpdate"
-        ref="map"
+        :bounds='fitBounds'
+        :options='mapOptions'
+        style='height: 80%'
+        @update:center='centerUpdate'
+        @update:zoom='zoomUpdate'
+        ref='map'
         )
         l-tile-layer(
-          :url="url"
-          :attribution="attribution"
+          :url='url'
+          :attribution='attribution'
         )
         l-geo-json(
-          :geojson="features"
-          ref="features"
+          :geojson='features'
+          ref='features'
         )
 
     loader(v-model='dialogProgress', :title='$t(`editor:save.processing`)', :subtitle='$t(`editor:save.pleaseWait`)')
