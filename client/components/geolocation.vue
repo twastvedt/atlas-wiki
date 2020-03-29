@@ -37,6 +37,7 @@
     loader(v-model='dialogProgress', :title='$t(`editor:save.processing`)', :subtitle='$t(`editor:save.pleaseWait`)')
     nav-footer
     notify
+    FeaturePopup(v-show='showPopup', ref='popup', :properties='popupProperties')
 </template>
 
 <script>
@@ -58,6 +59,9 @@ import 'leaflet-defaulticon-compatibility'
 
 import '@geoman-io/leaflet-geoman-free'
 import '@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css'
+
+import FeaturePopup from './featurePopup'
+
 /* global siteLangs */
 
 const router = new VueRouter({
@@ -73,7 +77,8 @@ export default {
     LMarker,
     LPopup,
     LTooltip,
-    LGeoJson
+    LGeoJson,
+    FeaturePopup
   },
   data() {
     return {
@@ -116,7 +121,8 @@ export default {
       mapOptions: {
         zoomSnap: 0.5
       },
-      showMap: true
+      popupProperties: {},
+      showPopup: false
     }
   },
   computed: {
@@ -171,9 +177,18 @@ export default {
 
       map.on('layeradd', e => {
         if (e.layer.feature) {
-          e.layer.bindPopup(`<div>${e.layer.feature.properties.id}</div>`)
+          e.layer.bindPopup((layer) => {
+            this.popupProperties = layer.feature.properties
+
+            return this.$refs.popup.$el
+          }, {
+            minWidth: 200
+          })
         }
       })
+
+      map.on('popupopen', e => { this.showPopup = true })
+      map.on('popupclose', e => { this.showPopup = false })
 
       this.$refs.features.mapObject.on('pm:update', this.update)
       this.$refs.features.mapObject.on('pm:dragend', this.update)
