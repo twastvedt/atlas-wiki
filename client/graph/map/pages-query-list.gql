@@ -1,0 +1,11 @@
+query {
+  pages {
+    list {
+      id
+      locale
+      path
+      title
+      description
+    }
+  }
+}
