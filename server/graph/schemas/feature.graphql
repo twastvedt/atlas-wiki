@@ -65,6 +65,7 @@ type FeatureGeojson {
 type FeatureProperties {
       id: Int!
       parentId: Int
+      pageId: Int
       pagePath: String
       title: String
       description: String

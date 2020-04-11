@@ -127,7 +127,7 @@ module.exports = class Feature extends Model {
       if (!_.isEmpty(title) && title !== feature.title) {
         featureData.title = _.trim(title)
       }
-      if (!_.isEmpty(pageId)) {
+      if (_.isFinite(pageId)) {
         featureData.pageId = pageId
       }
       if (!_.isEmpty(geojson)) {

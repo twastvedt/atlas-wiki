@@ -15,7 +15,7 @@
                 v-icon(v-if='isSelected(tag.tag)', color='primary') mdi-checkbox-intermediate
                 v-icon(v-else) mdi-checkbox-blank-outline
               v-list-item-title {{tag.title}}
-    v-content.grey(:class='$vuetify.theme.dark ? `darken-4-d5` : `lighten-3`')
+    v-content
       l-map(
         :bounds='fitBounds'
         :options='mapOptions'
@@ -33,7 +33,13 @@
     loader(v-model='dialogProgress', :title='$t(`editor:save.processing`)', :subtitle='$t(`editor:save.pleaseWait`)')
     nav-footer
     notify
+
     FeaturePopup(v-show='showPopup', ref='popup', :properties='popupProperties', @save='popupSave')
+
+    div(ref='tooltip')
+      v-chip(small, label, :color='$vuetify.theme.dark ? `grey darken-3-l5` : `grey lighten-4`' v-show='popupProperties.pageId').overline {{popupProperties.title}}
+      p(font-weight-bold, v-show='!popupProperties.pageId') {{popupProperties.title}}
+      p(v-show='popupProperties.description') {{popupProperties.description}}
 </template>
 
 <script>
@@ -183,15 +189,13 @@ export default {
             minWidth: 200
           })
 
-          if (feature.properties.title) {
-            e.layer.bindTooltip(feature.properties.title)
-          }
-
           e.layer.on('mouseover', () => {
             e.layer.unbindTooltip()
 
             if (feature.properties.title && !e.layer.isPopupOpen()) {
-              e.layer.bindTooltip(feature.properties.title).openTooltip()
+              this.popupProperties = feature.properties
+
+              e.layer.bindTooltip(this.$refs.tooltip).openTooltip()
             }
           })
         }
@@ -207,9 +211,18 @@ export default {
   methods: {
     async popupSave (properties) {
       try {
+        const saveData = {id: properties.id}
+
+        if (properties.pageId !== undefined) {
+          saveData.pageId = properties.pageId
+        } else {
+          saveData.title = properties.title
+          saveData.description = properties.description
+        }
+
         let resp = await this.$apollo.mutate({
           mutation: updateFeatureMutation,
-          variables: properties
+          variables: saveData
         })
         resp = _.get(resp, 'data.features.update', {})
         if (!_.get(resp, 'responseResult.succeeded')) {

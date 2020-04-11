@@ -1,6 +1,7 @@
 const GraphQLJSONObject = require('graphql-type-json').GraphQLJSONObject
 const graphHelper = require('../../helpers/graph')
 const _ = require('lodash')
+const knex = require('knex')
 
 /* global WIKI */
 
@@ -28,7 +29,16 @@ module.exports = {
     async listAsGeoJson(obj, args, context, info) {
       const results = await WIKI.models.features.query()
         .leftJoinRelated('page')
-        .select('features.id', 'parentId', 'features.title', 'features.description', 'geojson', 'features.createdAt', 'features.updatedAt', 'page.localeCode as pageLocale')
+        .select(
+          'features.id',
+          'parentId',
+          knex.raw('coalesce(page.title, features.title) as title'),
+          knex.raw('coalesce(features.description, page.description) as description'),
+          'geojson',
+          'features.createdAt',
+          'features.updatedAt',
+          knex.raw('concat(page."localeCode", \'/\', page.path) as pagePath'),
+          'page.id as pageId')
         .modify(queryBuilder => {
           if (args.parentId) {
             queryBuilder.where('parentId', args.parentId)

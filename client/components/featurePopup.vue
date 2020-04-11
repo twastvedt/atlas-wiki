@@ -1,9 +1,10 @@
 <template lang='pug'>
   v-form(:dark='darkMode').featurePopup
-    a(href='', v-show='!editMode && isPage', @click='goTo()') {{localProperties.title}}
-    v-autocomplete(dense, label='Page', v-show='editMode', v-model='localProperties.page', :items='pages', item-text='title', clearable=true)
-    v-text-field(dense, label='Title', :disabled='!editMode', v-model='localProperties.title', v-show='!isPage')
-    v-text-field(dense, label='Description', :disabled='!editMode', v-model='localProperties.description', v-show='!isPage')
+    div(v-show='!editMode && isPage')
+      v-chip(link, d-block, :color='$vuetify.theme.dark ? `grey darken-3-l5` : `grey lighten-4`', :href='pagePath()').overline {{localProperties.title}}
+    v-autocomplete(dense, label='Page', v-show='editMode', v-model='localProperties.pageId', :items='pages', item-text='title', item-value='id', clearable=true)
+    v-text-field(dense, label='Title', :readonly='!editMode', v-model='localProperties.title', v-show='!isPage')
+    v-text-field(dense, label='Description', :readonly='!editMode', v-model='localProperties.description', v-show='!isPage')
     v-btn(small, @click='save', v-show='editMode') {{ $t(`geo:save`) }}
     v-btn(small, @click='edit', v-show='!editMode') {{ $t(`geo:edit`) }}
 </template>
@@ -35,7 +36,7 @@ export default {
   computed: {
     darkMode: get('site/dark'),
     isPage () {
-      return this.localProperties && (this.localProperties.page || this.localProperties.pagePath)
+      return this.localProperties && (this.localProperties.pageId || this.localProperties.pagePath)
     }
   },
   watch: {
@@ -52,28 +53,35 @@ export default {
   },
   methods: {
     save () {
-      const page = this.localProperties.page
+      const saveData = {id: this.localProperties.id}
 
-      if (page) {
-        this.localProperties.title = page.title
-        this.localProperties.description = page.description
-        this.localProperties.pagePath = this.pagePath(page)
+      if (this.localProperties.pageId) {
+        const page = this.pages.find(p => p.id === this.localProperties.pageId)
+
+        saveData.title = page.title
+        saveData.description = page.description
+        saveData.pageId = page.id
+        saveData.pagePath = this.pagePath(page)
+      } else {
+        saveData.title = this.localProperties.title
+        saveData.description = this.localProperties.description
       }
 
-      this.$emit('save', this.localProperties)
+      this.$emit('save', saveData)
       this.editMode = false
     },
     edit () {
       this.editMode = true
     },
     pagePath(page) {
-      return `/${page.locale}/${page.path}`
-    },
-    goTo () {
-      if (this.isPage) {
-        window.location.assign(this.pagePath(this.localProperties.page))
+      if (page) {
+        return `/${page.locale}/${page.path}`
       } else if (this.localProperties.pagePath) {
-        window.location.assign(this.localProperties.pagePath)
+        return this.localProperties.pagePath
+      } else if (this.localProperties.pageId) {
+        page = this.pages.find(p => p.id === this.localProperties.pageId)
+
+        return `/${page.locale}/${page.path}`
       }
     }
   },
@@ -85,12 +93,6 @@ export default {
       watchLoading (isLoading) {
         this.isLoading = isLoading
         this.$store.commit(`loading${isLoading ? 'Start' : 'Stop'}`, 'pages-refresh')
-      },
-      variables () {
-        return {
-          locale: this.locale === 'any' ? null : this.locale,
-          tags: this.selection
-        }
       }
     }
   }
