@@ -19,9 +19,6 @@
       l-map(
         :bounds='fitBounds'
         :options='mapOptions'
-        style='height: 80%'
-        @update:center='centerUpdate'
-        @update:zoom='zoomUpdate'
         ref='map'
         )
         l-tile-layer(
@@ -52,7 +49,6 @@ import createFeatureMutation from 'gql/map/create.gql'
 import updateFeatureMutation from 'gql/map/update.gql'
 import deleteFeatureMutation from 'gql/map/delete.gql'
 
-import L from 'leaflet'
 import { LMap, LTileLayer, LMarker, LPopup, LTooltip, LGeoJson } from 'vue2-leaflet'
 import 'leaflet-defaulticon-compatibility'
 
@@ -114,9 +110,6 @@ export default {
       url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
       attribution:
         '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
-      currentZoom: 11.5,
-      currentCenter: L.latLng(47.41322, -1.219482),
-      showParagraph: false,
       mapOptions: {
         zoomSnap: 0.5
       },
@@ -222,15 +215,6 @@ export default {
     },
     goTo (page) {
       window.location.assign(`/${page.locale}/${page.path}`)
-    },
-    zoomUpdate(zoom) {
-      this.currentZoom = zoom
-    },
-    centerUpdate(center) {
-      this.currentCenter = center
-    },
-    showLongText() {
-      this.showParagraph = !this.showParagraph
     },
     showProgressDialog(textKey) {
       this.dialogProgress = true
