@@ -33,7 +33,7 @@
     loader(v-model='dialogProgress', :title='$t(`editor:save.processing`)', :subtitle='$t(`editor:save.pleaseWait`)')
     nav-footer
     notify
-    FeaturePopup(v-show='showPopup', ref='popup', :properties='popupProperties')
+    FeaturePopup(v-show='showPopup', ref='popup', :properties='popupProperties', @save='popupSave')
 </template>
 
 <script>
@@ -114,6 +114,7 @@ export default {
         zoomSnap: 0.5
       },
       popupProperties: {},
+      popupFeature: null,
       showPopup: false
     }
   },
@@ -172,6 +173,9 @@ export default {
           e.layer.bindPopup((layer) => {
             this.popupProperties = layer.feature.properties
 
+            this.popupProperties = feature.properties
+            this.popupFeature = feature
+
             return this.$refs.popup.$el
           }, {
             minWidth: 200
@@ -187,6 +191,29 @@ export default {
     })
   },
   methods: {
+    async popupSave (properties) {
+      try {
+        let resp = await this.$apollo.mutate({
+          mutation: updateFeatureMutation,
+          variables: properties
+        })
+        resp = _.get(resp, 'data.features.update', {})
+        if (!_.get(resp, 'responseResult.succeeded')) {
+          throw new Error(_.get(resp, 'responseResult.message'))
+        }
+
+        _.assign(this.popupProperties, properties)
+      } catch (err) {
+        this.$store.commit('showNotification', {
+          message: err.message,
+          style: 'error',
+          icon: 'warning'
+        })
+        throw err
+      }
+
+      this.$refs.map.mapObject.closePopup()
+    },
     toggleTag (tag) {
       if (_.includes(this.selection, tag)) {
         this.selection = _.without(this.selection, tag)
@@ -212,9 +239,6 @@ export default {
         _.set(urlObj, 'query.dir', this.orderByDirection === 0 ? `asc` : `desc`)
       }
       this.$router.push(urlObj)
-    },
-    goTo (page) {
-      window.location.assign(`/${page.locale}/${page.path}`)
     },
     showProgressDialog(textKey) {
       this.dialogProgress = true
