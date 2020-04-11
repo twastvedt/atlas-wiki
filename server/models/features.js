@@ -18,6 +18,7 @@ module.exports = class Feature extends Model {
       properties: {
         id: {type: 'integer'},
         parentId: {type: 'integer'},
+        pageId: {type: 'integer'},
         title: {type: 'string'},
         description: {type: 'string'},
         geojson: {type: 'object'},
@@ -29,6 +30,22 @@ module.exports = class Feature extends Model {
 
   static get relationMappings() {
     return {
+      page: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: require('./pages'),
+        join: {
+          from: 'features.pageId',
+          to: 'pages.id'
+        }
+      },
+      parent: {
+        relation: Model.BelongsToOneRelation,
+        modelClass: Feature,
+        join: {
+          from: 'features.parentId',
+          to: 'features.id'
+        }
+      }
     }
   }
 
@@ -49,7 +66,7 @@ module.exports = class Feature extends Model {
    *
    * @param {Object} param0 Feature Fields
    */
-  static async createNewFeature ({ parentId, title, description, geojson }) {
+  static async createNewFeature ({ parentId, pageId, title, description, geojson }) {
     // Input validation
     let validation = null
 
@@ -85,6 +102,7 @@ module.exports = class Feature extends Model {
     // Create the feature
     let newFeatureData = {
       parentId,
+      pageId,
       title,
       description,
       geojson
@@ -99,7 +117,7 @@ module.exports = class Feature extends Model {
    * @param {Object} param0 Feature ID and fields to update
    */
 
-  static async updateFeature ({ id, parentId, title, description, geojson }) {
+  static async updateFeature ({ id, parentId, pageId, title, description, geojson }) {
     const feature = await WIKI.models.features.query().findById(id)
     if (feature) {
       let featureData = {}
@@ -108,6 +126,9 @@ module.exports = class Feature extends Model {
       }
       if (!_.isEmpty(title) && title !== feature.title) {
         featureData.title = _.trim(title)
+      }
+      if (!_.isEmpty(pageId)) {
+        featureData.pageId = pageId
       }
       if (!_.isEmpty(geojson)) {
         featureData.geojson = geojson

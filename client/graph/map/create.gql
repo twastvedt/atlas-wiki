@@ -1,6 +1,6 @@
-mutation ($title: String, $description: String, $geojson: JSONObject!, $parentId: Int, ) {
+mutation ($title: String, $description: String, $geojson: JSONObject!, $parentId: Int, $pageId: Int) {
   features {
-    create(title: $title, description: $description, geojson: $geojson, parentId: $parentId) {
+    create(title: $title, description: $description, geojson: $geojson, parentId: $parentId, pageId: $pageId) {
       responseResult {
         succeeded
         errorCode

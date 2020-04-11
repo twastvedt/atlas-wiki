@@ -1,0 +1,14 @@
+query ($parentId: Int) {
+  features {
+    listAsGeoJson(parentId: $parentId) {
+      type
+      geometry
+      properties {
+        id,
+        title,
+        description,
+        pagePath
+      }
+    }
+  }
+}

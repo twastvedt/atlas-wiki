@@ -43,8 +43,8 @@ import _ from 'lodash'
 
 import tagsQuery from 'gql/common/common-pages-query-tags.gql'
 import pagesQuery from 'gql/common/common-pages-query-list.gql'
-import featuresQuery from 'gql/common/common-features-query-list.gql'
 
+import featuresQuery from 'gql/map/features-query-list.gql'
 import createFeatureMutation from 'gql/map/create.gql'
 import updateFeatureMutation from 'gql/map/update.gql'
 import deleteFeatureMutation from 'gql/map/delete.gql'
