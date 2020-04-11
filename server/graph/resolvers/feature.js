@@ -72,7 +72,7 @@ module.exports = {
         await WIKI.models.features.updateFeature(args)
 
         return {
-          responseResult: graphHelper.generateSuccess('Feature created successfully')
+          responseResult: graphHelper.generateSuccess('Feature updated successfully')
         }
       } catch (err) {
         return graphHelper.generateError(err)
