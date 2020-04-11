@@ -26,7 +26,6 @@
 	"codezombiech.gitignore",
 	"kumar-harsh.graphql-for-vscode",
 	"mrmlnc.vscode-duplicate",
-	"oderwat.indent-rainbow",
 	"christian-kohler.npm-intellisense"
 ],
   "postCreateCommand": ["yarn", "install"]
