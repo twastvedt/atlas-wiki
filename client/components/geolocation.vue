@@ -170,8 +170,10 @@ export default {
 
       map.on('layeradd', e => {
         if (e.layer.feature) {
+          const feature = e.layer.feature
+
           e.layer.bindPopup((layer) => {
-            this.popupProperties = layer.feature.properties
+            layer.unbindTooltip()
 
             this.popupProperties = feature.properties
             this.popupFeature = feature
@@ -179,6 +181,18 @@ export default {
             return this.$refs.popup.$el
           }, {
             minWidth: 200
+          })
+
+          if (feature.properties.title) {
+            e.layer.bindTooltip(feature.properties.title)
+          }
+
+          e.layer.on('mouseover', () => {
+            e.layer.unbindTooltip()
+
+            if (feature.properties.title && !e.layer.isPopupOpen()) {
+              e.layer.bindTooltip(feature.properties.title).openTooltip()
+            }
           })
         }
       })
