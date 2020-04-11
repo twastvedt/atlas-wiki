@@ -55,7 +55,9 @@ module.exports = {
             loader: 'babel-loader',
             options: {
               ...babelConfig,
-              cacheDirectory: babelDir
+              cacheDirectory: babelDir,
+              sourceMaps: true,
+              inputSourceMap: true
             }
           }
         ]
@@ -262,6 +264,7 @@ module.exports = {
       'node_modules'
     ]
   },
+  devtool: 'eval-source-map',
   node: {
     fs: 'empty'
   },
