@@ -27,8 +27,8 @@ module.exports = {
   FeatureQuery: {
     async listAsGeoJson(obj, args, context, info) {
       const results = await WIKI.models.features.query()
-        .select('id', 'parentId', 'title', 'description', 'geojson', 'createdAt', 'updatedAt', 'pageId')
-        .$relatedQuery('page')
+        .leftJoinRelated('page')
+        .select('features.id', 'parentId', 'features.title', 'features.description', 'geojson', 'features.createdAt', 'features.updatedAt', 'page.localeCode as pageLocale')
         .modify(queryBuilder => {
           if (args.parentId) {
             queryBuilder.where('parentId', args.parentId)
@@ -39,7 +39,7 @@ module.exports = {
     },
     async single(obj, args, context, info) {
       let feature = await WIKI.models.features.query().findById(args.id)
-      .$relatedQuery('page')
+        .$relatedQuery('page')
 
       return formatFeature(feature)
     }

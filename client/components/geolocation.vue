@@ -363,7 +363,7 @@ export default {
     features: {
       query: featuresQuery,
       fetchPolicy: 'cache-and-network',
-      update: (data) => _.cloneDeep(data.features.list),
+      update: (data) => _.cloneDeep(data.features.listAsGeoJson),
       watchLoading (isLoading) {
         this.isLoading = isLoading
         this.$store.commit(`loading${isLoading ? 'Start' : 'Stop'}`, 'pages-refresh')
