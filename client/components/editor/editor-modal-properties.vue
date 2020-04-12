@@ -17,11 +17,12 @@
         v-icon(left) mdi-check
         span {{ $t('common:actions.ok') }}
     v-card(tile)
-      v-tabs(color='white', background-color='blue darken-1', dark, centered)
-        v-tab {{$t('editor:props.info')}}
+      v-tabs(color='white', background-color='blue darken-1', dark, centered, v-model='selectedTab')
+        v-tab(key='info') {{$t('editor:props.info')}}
         v-tab {{$t('editor:props.scheduling')}}
         v-tab(disabled) {{$t('editor:props.scripts')}}
         v-tab {{$t('editor:props.social')}}
+        v-tab(key='geo') {{$t('editor:props.geo')}}
         v-tab-item
           v-card-text.pt-5
             .overline.pb-5 {{$t('editor:props.pageInfo')}}
@@ -250,6 +251,9 @@
               disabled
               inset
               )
+        v-tab-item
+          v-card-text.pt-5
+            .overline.pb-5 {{$t('editor:props.pageGeolocation')}}
 
     page-selector(:mode='pageSelectorMode', v-model='pageSelectorShown', :path='path', :locale='locale', :open-handler='setPath')
 </template>
@@ -266,6 +270,10 @@ export default {
     value: {
       type: Boolean,
       default: false
+    },
+    tab: {
+      type: Number,
+      default: 0
     }
   },
   data() {
@@ -276,7 +284,8 @@ export default {
       namespaces: siteLangs.length ? siteLangs.map(ns => ns.code) : [siteConfig.lang],
       newTag: '',
       newTagSuggestions: [],
-      newTagSearch: ''
+      newTagSearch: '',
+      selectedTab: 0
     }
   },
   computed: {
@@ -304,6 +313,13 @@ export default {
         _.delay(() => {
           this.$refs.iptTitle.focus()
           // this.$tours['editorPropertiesTour'].start()
+        }, 500)
+      }
+    },
+    tab(newValue) {
+      if (newValue) {
+        _.delay(() => {
+          this.selectedTab = newValue
         }, 500)
       }
     }

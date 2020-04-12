@@ -13,6 +13,11 @@
           full-width
         )
       template(slot='actions')
+        v-tooltip(bottom, v-if='featureId !== undefined')
+          template(v-slot:activator='{ on }')
+            v-btn.ml-2.mr-0(icon, v-on='on', @click='() => openPropsModal(4)')
+              v-icon(color='grey') mdi-earth
+          span {{$t('common:page.editFeature')}}
         v-btn.mr-3.animated.fadeIn(color='amber', outlined, small, v-if='isConflict')
           .overline.amber--text.mr-3 Conflict
           status-indicator(intermediary, pulse)
@@ -30,7 +35,7 @@
         v-btn.animated.fadeInDown.wait-p1s(
           text
           color='blue'
-          @click='openPropsModal'
+          @click='() => openPropsModal(0)'
           :class='{ "is-icon": $vuetify.breakpoint.mdAndDown, "mx-0": !welcomeMode, "ml-0": welcomeMode }'
           )
           v-icon(color='blue', :left='$vuetify.breakpoint.lgAndUp') mdi-tag-text-outline
@@ -47,7 +52,7 @@
         v-divider.ml-3(vertical)
     v-content
       component(:is='currentEditor', :save='save')
-      editor-modal-properties(v-model='dialogProps')
+      editor-modal-properties(v-model='dialogProps', :tab='dialogTab')
       editor-modal-editorselect(v-model='dialogEditorSelector')
       editor-modal-unsaved(v-model='dialogUnsaved', @discard='exitGo')
       component(:is='activeModal')
@@ -142,6 +147,7 @@ export default {
     return {
       isConflict: false,
       dialogProps: false,
+      dialogTab: 0,
       dialogProgress: false,
       dialogEditorSelector: false,
       dialogUnsaved: false,
@@ -215,7 +221,11 @@ export default {
     // this.currentEditor = `editorApi`
   },
   methods: {
-    openPropsModal(name) {
+    openPropsModal(number) {
+      if (_.isFinite(number)) {
+        this.dialogTab = number
+      }
+
       this.dialogProps = true
     },
     showProgressDialog(textKey) {
@@ -245,7 +255,8 @@ export default {
               publishEndDate: this.$store.get('page/publishEndDate') || '',
               publishStartDate: this.$store.get('page/publishStartDate') || '',
               tags: this.$store.get('page/tags'),
-              title: this.$store.get('page/title')
+              title: this.$store.get('page/title'),
+              featureId: this.$store.get('page/featureId')
             }
           })
           resp = _.get(resp, 'data.pages.create', {})
@@ -281,7 +292,8 @@ export default {
               publishEndDate: this.$store.get('page/publishEndDate') || '',
               publishStartDate: this.$store.get('page/publishStartDate') || '',
               tags: this.$store.get('page/tags'),
-              title: this.$store.get('page/title')
+              title: this.$store.get('page/title'),
+              featureId: this.$store.get('page/featureId')
             }
           })
           resp = _.get(resp, 'data.pages.update', {})
