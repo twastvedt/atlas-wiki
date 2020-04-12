@@ -1,8 +1,10 @@
 <template lang='pug'>
   v-form(:dark='darkMode').featurePopup
     div(v-show='!editMode && isPage')
-      v-chip(link, d-block, :color='$vuetify.theme.dark ? `grey darken-3-l5` : `grey lighten-4`', :href='pagePath()').overline {{localProperties.title}}
+      v-chip(d-block, :color='$vuetify.theme.dark ? `grey darken-3-l5` : `grey lighten-4`', :href='pagePath()').overline {{localProperties.title}}
     v-autocomplete(dense, label='Page', v-show='editMode', v-model='localProperties.pageId', :items='pages', item-text='title', item-value='id', clearable=true)
+    v-btn(small, link, @click='newPage', v-show='editMode')
+      v-icon(dense) mdi-plus
     v-text-field(dense, label='Title', :readonly='!editMode', v-model='localProperties.title', v-show='!isPage')
     v-text-field(dense, label='Description', :readonly='!editMode', v-model='localProperties.description', v-show='!isPage')
     v-btn(small, @click='save', v-show='editMode') {{ $t(`geo:save`) }}
@@ -83,6 +85,17 @@ export default {
 
         return `/${page.locale}/${page.path}`
       }
+    },
+    newPage() {
+      let pageName
+
+      if (this.localProperties.title) {
+        pageName = this.localProperties.title
+      } else {
+        pageName = 'new-page'
+      }
+
+      window.location.assign(`/e/${pageName}?title=${pageName};featureId=${this.localProperties.id}`)
     }
   },
   apollo: {

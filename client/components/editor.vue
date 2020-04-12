@@ -132,6 +132,10 @@ export default {
     checkoutDate: {
       type: String,
       default: new Date().toISOString()
+    },
+    featureId: {
+      type: Number,
+      default: null
     }
   },
   data() {
@@ -160,7 +164,8 @@ export default {
         this.title !== this.$store.get('page/title'),
         this.description !== this.$store.get('page/description'),
         this.tags !== this.$store.get('page/tags'),
-        this.isPublished !== this.$store.get('page/isPublished')
+        this.isPublished !== this.$store.get('page/isPublished'),
+        this.featureId !== this.$store.get('page/featureId')
       ], Boolean)
     }
   },
@@ -181,6 +186,7 @@ export default {
     this.$store.commit('page/SET_PATH', this.path)
     this.$store.commit('page/SET_TAGS', this.tags)
     this.$store.commit('page/SET_TITLE', this.title)
+    this.$store.commit('page/SET_FEATURE_ID', this.featureId)
 
     this.$store.commit('page/SET_MODE', 'edit')
   },

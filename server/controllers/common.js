@@ -195,6 +195,10 @@ router.get(['/e', '/e/*'], async (req, res, next) => {
         page.description = pageOriginal.description
       }
     }
+
+    if (req.query.featureId && _.isFinite(req.query.featureId)) {
+      page.featureId = req.query.featureId
+    }
   }
   res.render('editor', { page, injectCode })
 })
