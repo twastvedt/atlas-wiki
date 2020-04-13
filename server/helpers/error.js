@@ -149,6 +149,10 @@ module.exports = {
     message: 'Page content cannot be empty.',
     code: 6004
   }),
+  PageRenderFailed: CustomError('PageRenderFailed', {
+    message: 'Page render failed.',
+    code: 6101
+  }),
   PageHistoryForbidden: CustomError('PageHistoryForbidden', {
     message: 'You are not authorized to view the history of this page.',
     code: 6012

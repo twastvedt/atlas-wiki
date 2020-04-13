@@ -273,7 +273,11 @@ module.exports = class Page extends Model {
     }
 
     // -> Render page to HTML
-    await WIKI.models.pages.renderPage(page)
+    try {
+      await WIKI.models.pages.renderPage(page)
+    } catch {
+      throw new WIKI.Error.PageRenderFailed()
+    }
 
     // -> Rebuild page tree
     await WIKI.models.pages.rebuildTree()
