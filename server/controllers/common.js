@@ -196,8 +196,12 @@ router.get(['/e', '/e/*'], async (req, res, next) => {
       }
     }
 
-    if (req.query.featureId && _.isFinite(req.query.featureId)) {
-      page.featureId = req.query.featureId
+    if (req.query.featureId) {
+      const featureId = parseInt(req.query.featureId)
+
+      if (_.isFinite(featureId)) {
+        page.featureId = featureId
+      }
     }
   }
   res.render('editor', { page, injectCode })
