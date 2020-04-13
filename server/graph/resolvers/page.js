@@ -97,8 +97,20 @@ module.exports = {
           if (args.locale) {
             queryBuilder.where('localeCode', args.locale)
           }
+          if (args.creatorId && args.authorId && args.creatorId > 0 && args.authorId > 0) {
+            queryBuilder.where(function () {
+              this.where('creatorId', args.creatorId).orWhere('authorId', args.authorId)
+            })
+          } else {
+            if (args.creatorId && args.creatorId > 0) {
+              queryBuilder.where('creatorId', args.creatorId)
+            }
+            if (args.authorId && args.authorId > 0) {
+              queryBuilder.where('authorId', args.authorId)
+            }
+          }
           if (args.tags && args.tags.length > 0) {
-            queryBuilder.whereIn('tags.tag', args.tags)
+            queryBuilder.whereIn('tags.tag', args.tags.map(t => _.trim(t).toLowerCase()))
           }
           const orderDir = args.orderByDirection === 'DESC' ? 'desc' : 'asc'
           switch (args.orderBy) {
@@ -139,7 +151,7 @@ module.exports = {
     async single (obj, args, context, info) {
       let page = await WIKI.models.pages.getPageFromDb(args.id)
       if (page) {
-        if (WIKI.auth.checkAccess(context.req.user, ['read:history'], {
+        if (WIKI.auth.checkAccess(context.req.user, ['manage:pages', 'delete:pages'], {
           path: page.path,
           locale: page.localeCode
         })) {
@@ -165,14 +177,15 @@ module.exports = {
      * SEARCH TAGS
      */
     async searchTags (obj, args, context, info) {
+      const query = _.trim(args.query)
       const results = await WIKI.models.tags.query()
         .column('tag')
         .where(builder => {
           builder.andWhere(builderSub => {
             if (WIKI.config.db.type === 'postgres') {
-              builderSub.where('tag', 'ILIKE', `%${args.query}%`)
+              builderSub.where('tag', 'ILIKE', `%${query}%`)
             } else {
-              builderSub.where('tag', 'LIKE', `%${args.query}%`)
+              builderSub.where('tag', 'LIKE', `%${query}%`)
             }
           })
         })
@@ -263,9 +276,31 @@ module.exports = {
           path: page.path,
           locale: page.localeCode
         })) {
-          return page.updatedAt !== args.checkoutDate
+          return page.updatedAt > args.checkoutDate
         } else {
           throw new WIKI.Error.PageUpdateForbidden()
+        }
+      } else {
+        throw new WIKI.Error.PageNotFound()
+      }
+    },
+    /**
+     * FETCH LATEST VERSION FOR CONFLICT COMPARISON
+     */
+    async conflictLatest (obj, args, context, info) {
+      let page = await WIKI.models.pages.getPageFromDb(args.id)
+      if (page) {
+        if (WIKI.auth.checkAccess(context.req.user, ['write:pages', 'manage:pages'], {
+          path: page.path,
+          locale: page.localeCode
+        })) {
+          return {
+            ...page,
+            tags: page.tags.map(t => t.tag),
+            locale: page.localeCode
+          }
+        } else {
+          throw new WIKI.Error.PageViewForbidden()
         }
       } else {
         throw new WIKI.Error.PageNotFound()
@@ -366,8 +401,8 @@ module.exports = {
         const affectedRows = await WIKI.models.tags.query()
           .findById(args.id)
           .patch({
-            tag: args.tag,
-            title: args.title
+            tag: _.trim(args.tag).toLowerCase(),
+            title: _.trim(args.title)
           })
         if (affectedRows < 1) {
           throw new Error('This tag does not exist.')
