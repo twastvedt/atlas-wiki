@@ -32,12 +32,12 @@ module.exports = {
         .select(
           'features.id',
           'parentId',
-          knex.raw('coalesce(page.title, features.title) as title'),
-          knex.raw('coalesce(features.description, page.description) as description'),
+          WIKI.models.knex.raw('coalesce(page.title, features.title) as title'),
+          WIKI.models.knex.raw('coalesce(features.description, page.description) as description'),
           'geojson',
           'features.createdAt',
           'features.updatedAt',
-          knex.raw('concat(page."localeCode", \'/\', page.path) as pagePath'),
+          WIKI.models.knex.raw('concat(page."localeCode", \'/\', page.path) as pagePath'),
           'page.id as pageId')
         .modify(queryBuilder => {
           if (args.parentId) {
