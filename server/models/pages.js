@@ -267,6 +267,11 @@ module.exports = class Page extends Model {
       await WIKI.models.tags.associateTags({ tags: opts.tags, page })
     }
 
+    // -> Save feature link
+    if (_.isFinite(opts.featureId)) {
+      await WIKI.models.features.updateFeature({id: opts.featureId, pageId: page.id})
+    }
+
     // -> Render page to HTML
     await WIKI.models.pages.renderPage(page)
 

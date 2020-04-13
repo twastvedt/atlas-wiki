@@ -85,6 +85,7 @@ type PageMutation {
     publishStartDate: Date
     tags: [String]!
     title: String!
+    featureId: Int
   ): PageResponse @auth(requires: ["write:pages", "manage:pages", "manage:system"])
 
   update(
