@@ -95,7 +95,13 @@ export default {
         pageName = 'new-page'
       }
 
-      window.location.assign(`/e/${pageName}?title=${pageName};featureId=${this.localProperties.id}`)
+      let slug = _.kebabCase(pageName)
+
+      while (this.pages.find(p => p.path === slug)) {
+        slug += '-1'
+      }
+
+      window.location.assign(`/e/${slug}?title=${pageName}&featureId=${this.localProperties.id}`)
     }
   },
   apollo: {
