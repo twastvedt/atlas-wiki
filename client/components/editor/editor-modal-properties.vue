@@ -317,10 +317,8 @@ export default {
       }
     },
     tab(newValue) {
-      if (newValue) {
-        _.delay(() => {
-          this.selectedTab = newValue
-        }, 500)
+      if (_.isFinite(newValue)) {
+        this.selectedTab = newValue
       }
     }
   },
