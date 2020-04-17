@@ -26,6 +26,10 @@ module.exports = {
       timestamp: true
     }))
 
+    logger.add(new winston.transports.File({
+      filename: 'log.log'
+    }))
+
     // _.forOwn(_.omitBy(WIKI.config.logging.loggers, s => s.enabled === false), (loggerConfig, loggerKey) => {
     //   let loggerModule = require(`../modules/logging/${loggerKey}`)
     //   loggerModule.init(logger, loggerConfig)
