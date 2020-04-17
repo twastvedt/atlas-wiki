@@ -163,7 +163,9 @@ export default {
       })
 
       map.on('pm:create', e => {
-        this.create(e.layer.toGeoJSON())
+        this.create(e.layer)
+
+        this.setUpLayer(e.layer)
 
         // listen to changes on the new layer
         e.layer.on('pm:update', this.update)
@@ -176,28 +178,7 @@ export default {
 
       map.on('layeradd', e => {
         if (e.layer.feature) {
-          const feature = e.layer.feature
-
-          e.layer.bindPopup((layer) => {
-            layer.unbindTooltip()
-
-            this.popupProperties = feature.properties
-            this.popupFeature = feature
-
-            return this.$refs.popup.$el
-          }, {
-            minWidth: 200
-          })
-
-          e.layer.on('mouseover', () => {
-            e.layer.unbindTooltip()
-
-            if (feature.properties.title && !e.layer.isPopupOpen()) {
-              this.popupProperties = feature.properties
-
-              e.layer.bindTooltip(this.$refs.tooltip).openTooltip()
-            }
-          })
+          this.setUpLayer(e.layer)
         }
       })
 
@@ -209,6 +190,30 @@ export default {
     })
   },
   methods: {
+    setUpLayer(layer) {
+      const feature = layer.feature
+
+      layer.bindPopup((l) => {
+        l.unbindTooltip()
+
+        this.popupProperties = feature.properties
+        this.popupFeature = feature
+
+        return this.$refs.popup.$el
+      }, {
+        minWidth: 200
+      })
+
+      layer.on('mouseover', () => {
+        layer.unbindTooltip()
+
+        if (feature.properties.title && !layer.isPopupOpen()) {
+          this.popupProperties = feature.properties
+
+          layer.bindTooltip(this.$refs.tooltip).openTooltip()
+        }
+      })
+    },
     async popupSave (properties) {
       try {
         const saveData = {id: properties.id}
@@ -273,7 +278,10 @@ export default {
     hideProgressDialog() {
       this.dialogProgress = false
     },
-    async create(geojson) {
+    async create(layer) {
+      const geojson = layer.toGeoJSON()
+      layer.feature = geojson
+
       this.showProgressDialog('saving')
       try {
         let resp = await this.$apollo.mutate({
