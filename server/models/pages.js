@@ -670,7 +670,7 @@ module.exports = class Page extends Model {
         } else {
           // -> No render? Possible duplicate issue
           /* TODO: Detect duplicate and delete */
-          throw new Error('Error while fetching page. Duplicate entry detected. Reload the page to try again.')
+          throw new Error('Error while fetching page. Duplicate entry or failed render.')
         }
       }
     }
