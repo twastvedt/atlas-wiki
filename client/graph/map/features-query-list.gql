@@ -8,7 +8,8 @@ query ($parentId: Int) {
         title,
         description,
         pageId,
-        pagePath
+        pagePath,
+        imagePath
       }
     }
   }

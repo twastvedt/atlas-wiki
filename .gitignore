@@ -44,6 +44,3 @@ server/views/setup.pug
 # Test results
 test-results/
 .scannerwork
-
-# Localization Resources
-/server/locales/**/*.yml

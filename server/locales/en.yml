@@ -1,0 +1,15 @@
+common:
+  header:
+    browseGeo: 'Browse by Geolocation'
+  page:
+    editFeature: 'Edit map feature'
+
+geo:
+  localeAny: 'any'
+  save: 'Save'
+  edit: 'Edit'
+  placeImageButton: 'Place Image'
+
+editor:
+  props:
+    geo: 'Geolocation'

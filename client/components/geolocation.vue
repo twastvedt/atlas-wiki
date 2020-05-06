@@ -25,10 +25,7 @@
           :url='url'
           :attribution='attribution'
         )
-        l-geo-json(
-          :geojson='features'
-          ref='features'
-        )
+      component(:is='activeModal', class='modal')
 
     loader(v-model='dialogProgress', :title='$t(`editor:save.processing`)', :subtitle='$t(`editor:save.pleaseWait`)')
     nav-footer
@@ -43,7 +40,7 @@
 </template>
 
 <script>
-import { get } from 'vuex-pathify'
+import { get, sync } from 'vuex-pathify'
 import VueRouter from 'vue-router'
 import _ from 'lodash'
 
@@ -55,15 +52,25 @@ import createFeatureMutation from 'gql/map/create.gql'
 import updateFeatureMutation from 'gql/map/update.gql'
 import deleteFeatureMutation from 'gql/map/delete.gql'
 
-import { LMap, LTileLayer, LMarker, LPopup, LTooltip, LGeoJson } from 'vue2-leaflet'
+import L from 'leaflet'
+import { LMap, LTileLayer, LMarker, LPopup, LTooltip } from 'vue2-leaflet'
 import 'leaflet-defaulticon-compatibility'
+import 'leaflet-toolbar'
 
 import '@geoman-io/leaflet-geoman-free'
 import '@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css'
 
+import placeImage from './PlaceImage'
+import { GeoJSONWithImage } from './GeoJSONWithImage'
+
 import FeaturePopup from './featurePopup'
 
+import editorStore from '../store/editor'
+
+/* global WIKI */
 /* global siteLangs */
+
+WIKI.$store.registerModule('editor', editorStore)
 
 const router = new VueRouter({
   mode: 'history',
@@ -71,15 +78,15 @@ const router = new VueRouter({
 })
 
 export default {
-  i18nOptions: { namespaces: 'geo' },
+  i18nOptions: { namespaces: ['geo', 'editor'] },
   components: {
     LMap,
     LTileLayer,
     LMarker,
     LPopup,
     LTooltip,
-    LGeoJson,
-    FeaturePopup
+    FeaturePopup,
+    editorModalMedia: () => import(/* webpackChunkName: "editor", webpackMode: "eager" */ './editor/editor-modal-media.vue')
   },
   data() {
     return {
@@ -90,6 +97,7 @@ export default {
       locales: [],
       pages: [],
       features: [],
+      featuresLayer: null,
       dialogProgress: false,
       isLoading: true,
       scrollStyle: {
@@ -126,6 +134,8 @@ export default {
   },
   computed: {
     darkMode: get('site/dark'),
+    activeModal: sync('editor/activeModal'),
+    editorKey: sync('editor/editorKey'),
     tagsSelected () {
       return _.filter(this.tags, t => _.includes(this.selection, t.tag))
     },
@@ -133,12 +143,22 @@ export default {
       return _.groupBy(this.tags, t => t.title.charAt(0).toUpperCase())
     },
     fitBounds() {
-      return this.$refs.features?.mapObject?.getBounds()
+      return this.featuresLayer?.mapObject?.getBounds()
     }
   },
   watch: {
     locale (newValue, oldValue) {
       this.rebuildURL()
+    },
+    features (newValue, oldValue) {
+      const map = this.$refs.map.mapObject
+
+      this.featuresLayer = new GeoJSONWithImage(newValue)
+
+      this.featuresLayer.on('pm:update', this.update)
+      this.featuresLayer.on('pm:dragend', this.update)
+
+      map.addLayer(this.featuresLayer)
     }
   },
   router,
@@ -151,16 +171,56 @@ export default {
     )
 
     this.selection = _.compact(this.$route.path.split('/'))
+
+    this.editorKey = 'common'
   },
   mounted () {
     this.$nextTick(() => {
       const map = this.$refs.map.mapObject
+
+      const geolocationThis = this
+
+      const newToolbar = L.PM.Toolbar.extend({
+        _defineButtons: function() {
+          L.PM.Toolbar.prototype._defineButtons.call(this)
+
+          const placeImageButton = {
+            className: 'control-icon leaflet-pm-icon-image',
+            title: geolocationThis.$t('geo:placeImageButton'),
+            jsClass: 'Image',
+            onClick: () => {},
+            afterClick: () => geolocationThis.toggleModal('editorModalMedia'),
+            doToggle: true,
+            toggleStatus: false,
+            disableOtherButtons: false,
+            position: this.options.position,
+            actions: ['finish', 'cancel']
+          }
+
+          this._addButton('placeImage', new L.Control.PMButton(placeImageButton))
+        },
+        applyIconStyle() {
+          L.PM.Toolbar.prototype.applyIconStyle.call(this)
+
+          const imageButton = this.buttons['placeImage']
+
+          L.Util.setOptions(imageButton, {
+            className: 'control-icon leaflet-pm-icon-image'
+          })
+        }
+      })
+
+      newToolbar.prototype.options.placeImage = true
+
+      map.pm.Toolbar = new newToolbar(map)
 
       map.pm.addControls({
         position: 'topleft',
         drawCircle: false,
         cutPolygon: false
       })
+
+      map.pm.Draw.Image = new placeImage(map)
 
       map.on('pm:create', e => {
         this.create(e.layer)
@@ -176,6 +236,10 @@ export default {
         this.delete(e.layer.feature.properties.id)
       })
 
+      map.on('pm:globaleditmodetoggled', e => {
+        console.log(e)
+      })
+
       map.on('layeradd', e => {
         if (e.layer.feature) {
           this.setUpLayer(e.layer)
@@ -185,11 +249,17 @@ export default {
       map.on('popupopen', e => { this.showPopup = true })
       map.on('popupclose', e => { this.showPopup = false })
 
-      this.$refs.features.mapObject.on('pm:update', this.update)
-      this.$refs.features.mapObject.on('pm:dragend', this.update)
+      this.$root.$on('editorInsert', opts => {
+        if (opts.kind === 'IMAGE') {
+          map.pm.Draw.Image.addImage(opts.path)
+        }
+      })
     })
   },
   methods: {
+    toggleModal(key) {
+      this.activeModal = (this.activeModal === key) ? '' : key
+    },
     setUpLayer(layer) {
       const feature = layer.feature
 
@@ -280,6 +350,7 @@ export default {
     },
     async create(layer) {
       const geojson = layer.toGeoJSON()
+
       layer.feature = geojson
 
       this.showProgressDialog('saving')
@@ -395,5 +466,13 @@ export default {
 </script>
 
 <style lang='scss'>
-
+.v-content .modal {
+  z-index: 10000;
+}
+.leaflet-pm-toolbar .leaflet-pm-icon-image {
+  background-image: url('../static/svg/mdi-image-outline.svg');
+}
+ul.leaflet-popup-toolbar {
+  padding: 0;
+}
 </style>
