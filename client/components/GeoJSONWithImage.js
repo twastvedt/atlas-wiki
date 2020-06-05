@@ -49,7 +49,12 @@ export var GeoJSONWithImage = GeoJSON.extend({
     }
 
     return this.addLayer(layer)
-  }
+  },
+  // Fill in method and property from DistortableImageCollection. DistortableImageOverlay checks this method on its parent to see if it is in a collection.
+  anyCollected: function() {
+    return false
+  },
+  editing: { }
 })
 
 export function geometryToLayer(geojson, options) {

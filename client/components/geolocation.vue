@@ -155,9 +155,6 @@ export default {
 
       this.featuresLayer = new GeoJSONWithImage(newValue)
 
-      this.featuresLayer.on('pm:update', this.update)
-      this.featuresLayer.on('pm:dragend', this.update)
-
       map.addLayer(this.featuresLayer)
     }
   },
@@ -173,6 +170,8 @@ export default {
     this.selection = _.compact(this.$route.path.split('/'))
 
     this.editorKey = 'common'
+
+    console.debug('geolocation created')
   },
   mounted () {
     this.$nextTick(() => {
@@ -226,10 +225,6 @@ export default {
         this.create(e.layer)
 
         this.setUpLayer(e.layer)
-
-        // listen to changes on the new layer
-        e.layer.on('pm:update', this.update)
-        e.layer.on('pm:dragend', this.update)
       })
 
       map.on('pm:remove', e => {
@@ -237,7 +232,15 @@ export default {
       })
 
       map.on('pm:globaleditmodetoggled', e => {
-        console.log(e)
+        this.featuresLayer.eachLayer(layer => {
+          if (layer instanceof L.DistortableImageOverlay) {
+            if (e.enabled) {
+              layer.editing.enable()
+            } else {
+              layer.editing.disable()
+            }
+          }
+        })
       })
 
       map.on('layeradd', e => {
@@ -262,6 +265,11 @@ export default {
     },
     setUpLayer(layer) {
       const feature = layer.feature
+
+      // listen to changes on the new layer
+      layer.on('pm:update', this.update)
+      layer.on('pm:dragend', this.update)
+      layer.on('edit', this.update)
 
       layer.bindPopup((l) => {
         l.unbindTooltip()
