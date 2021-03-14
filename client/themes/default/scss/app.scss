@@ -1,6 +1,6 @@
 /* THEME SPECIFIC STYLES */
 
-.v-content .contents {
+.v-main .contents {
   color: mc('grey', '800');
   padding: .5rem 0 50px;
   position: relative;
@@ -226,9 +226,26 @@
 
   blockquote {
     padding: 0 1rem 1rem 1rem;
-    border-left: 5px solid mc('blue', '500');
+    background-color: mc('blue-grey', '50');
+    border-left: 55px solid mc('blue-grey', '500');
     border-radius: .5rem;
     margin: 1rem 0;
+    position: relative;
+
+    @at-root .theme--dark & {
+      background-color: mc('blue-grey', '900');
+    }
+
+    &::before {
+      display: inline-block;
+      font: normal normal normal 24px/1 "Material Design Icons", sans-serif;
+      position: absolute;
+      margin-top: -12px;
+      top: 50%;
+      left: -38px;
+      color: rgba(255, 255, 255, .7);
+      content: "\F0757";
+    }
 
     > p:first-child .emoji {
       margin-right: .5rem;
@@ -243,6 +260,10 @@
       background-color: mc('blue', '50');
       border-color: mc('blue', '300');
       color: mc('blue', '900');
+
+      &::before {
+        content: "\F02FC";
+      }
 
       code {
         background-color: mc('blue', '50');
@@ -259,6 +280,10 @@
       background-color: mc('orange', '50');
       border-color: mc('orange', '300');
       color: darken(mc('orange', '900'), 10%);
+
+      &::before {
+        content: "\F0026";
+      }
 
       code {
         background-color: mc('orange', '50');
@@ -277,6 +302,10 @@
       border-color: mc('red', '300');
       color: mc('red', '900');
 
+      &::before {
+        content: "\F0159";
+      }
+
       code {
         background-color: mc('red', '50');
         color: mc('red', '800');
@@ -292,6 +321,10 @@
       background-color: mc('green', '50');
       border-color: mc('green', '300');
       color: mc('green', '900');
+
+      &::before {
+        content: "\F0E1E";
+      }
 
       code {
         background-color: mc('green', '50');
@@ -310,7 +343,7 @@
   // LISTS
   // ---------------------------------
 
-  ol, ul {
+  ol, ul:not(.tabset-tabs) {
     padding-top: 1rem;
     width: 100%;
 
@@ -471,7 +504,7 @@
     }
   }
 
-  ul {
+  ul:not(.tabset-tabs) {
     list-style: none;
     > li::before {
       position: absolute;
@@ -481,11 +514,12 @@
       width: 1.35rem;
 
       @at-root .is-rtl & {
+        right: -1.1rem;
         content: '\25C3';
       }
     }
   }
-  ul, ol {
+  ol, ul:not(.tabset-tabs) {
     > li {
       position: relative;
       > p {
@@ -545,6 +579,10 @@
         letter-spacing: initial;
       }
     }
+  }
+
+  .diagram {
+    margin-top: 1rem;
   }
 
   // ---------------------------------
@@ -619,6 +657,59 @@
     }
   }
 
+  figure.table {
+    margin: 0;
+
+    > table {
+      background-color: #FFF;
+      margin: 0;
+      border-collapse: collapse;
+      box-shadow: 0 0 5px 0 rgba(0, 0, 0, .07);
+
+      @at-root .theme--dark & {
+        background-color: darken(mc('grey', '900'), 3%);
+      }
+
+      td, th {
+        border: 1px solid mc('blue-grey', '100');
+        box-shadow: inset -1px -1px 0 0 #FFF, inset 1px 0 0 #FFF;
+        padding: .5rem .75rem;
+
+        @at-root .theme--dark & {
+          border-color: mc('grey', '700');
+          box-shadow: inset -1px -1px 0 0 rgba(0,0,0, .5);
+        }
+      }
+
+      th {
+        background-color: lighten(mc('blue-grey', '50'), 1%);
+        font-weight: 700;
+        color: mc('blue-grey', '700');
+
+        @at-root .theme--dark & {
+          background-color: mc('grey', '800');
+          color: mc('grey', '400');
+        }
+      }
+
+      thead th {
+        border-bottom: 2px solid mc('blue-grey', '100');
+
+        @at-root .theme--dark & {
+          border-bottom: none;
+        }
+      }
+
+      tbody th {
+        background-color: lighten(mc('blue-grey', '50'), 4%);
+
+        @at-root .theme--dark & {
+          background-color: darken(mc('grey', '800'), 8%);
+        }
+      }
+    }
+  }
+
   // ---------------------------------
   // IMAGES
   // ---------------------------------
@@ -682,6 +773,14 @@
         background-color: mc('grey', '800');
       }
     }
+  }
+
+  figure.image-style-align-right {
+    float: right;
+  }
+
+  figure.image-style-align-left {
+    float: left;
   }
 
   // ---------------------------------
@@ -769,6 +868,48 @@
     }
   }
 
+  .mention {
+    background-color: rgba(153, 0, 48, .1);
+    color: #990030;
+
+    @at-root .theme--dark & {
+      color: mc('pink', '500');
+    }
+  }
+
+}
+
+// ---------------------------------
+// COMMENTS
+// ---------------------------------
+
+.comments {
+  &-container {
+    border-radius: 7px;
+  }
+
+  &-header {
+    color: #FFF;
+    padding: 8px 20px;
+    font-size: 16px;
+    font-weight: 500;
+    background-color: mc('blue-grey', '500');
+    border-radius: 7px 7px 0 0;
+
+    @at-root .theme--dark & {
+      background-color: lighten(mc('blue-grey', '900'), 5%);
+    }
+  }
+
+  &-main {
+    background-color: mc('blue-grey', '50');
+    border-radius: 0 0 7px 7px;
+    padding: 20px;
+
+    @at-root .theme--dark & {
+      background-color: darken(mc('grey', '900'), 5%);
+    }
+  }
 }
 
 // ---------------
@@ -853,5 +994,9 @@
         text-shadow: none;
       }
     }
+  }
+
+  .comments-container {
+    display: none;
   }
 }

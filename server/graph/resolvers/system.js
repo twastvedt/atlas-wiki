@@ -34,7 +34,14 @@ module.exports = {
         result.push({ key, value })
       }, [])
     },
-    async info() { return {} }
+    async info () { return {} },
+    async extensions () {
+      const exts = Object.values(WIKI.extensions.ext).map(ext => _.pick(ext, ['key', 'title', 'description', 'isInstalled']))
+      for (let ext of exts) {
+        ext.isCompatible = await WIKI.extensions.ext[ext.key].isCompatible()
+      }
+      return exts
+    }
   },
   SystemMutation: {
     async updateFlags (obj, args, context) {
@@ -205,6 +212,7 @@ module.exports = {
 
           if (args.groupMode !== `NONE`) {
             await WIKI.auth.reloadGroups()
+            WIKI.events.outbound.emit('reloadGroups')
           }
 
           client.close()

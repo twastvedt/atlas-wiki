@@ -7,12 +7,12 @@ const zlib = require('zlib')
 module.exports = {
   init (mdinst, conf) {
     mdinst.use((md, opts) => {
-      const openMarker = opts.openMarker || '@startuml'
+      const openMarker = opts.openMarker || '```plantuml'
       const openChar = openMarker.charCodeAt(0)
-      const closeMarker = opts.closeMarker || '@enduml'
+      const closeMarker = opts.closeMarker || '```'
       const closeChar = closeMarker.charCodeAt(0)
       const imageFormat = opts.imageFormat || 'svg'
-      const server = opts.server || 'https://www.plantuml.com/plantuml'
+      const server = opts.server || 'https://plantuml.requarks.io'
 
       md.block.ruler.before('fence', 'uml_diagram', (state, startLine, endLine, silent) => {
         let nextLine
@@ -74,7 +74,7 @@ module.exports = {
             continue
           }
 
-          var closeMarkerMatched = true
+          let closeMarkerMatched = true
           for (i = 0; i < closeMarker.length; ++i) {
             if (closeMarker[i] !== state.src[start + i]) {
               closeMarkerMatched = false
@@ -112,11 +112,11 @@ module.exports = {
           altToken
         )
 
-        var zippedCode = encode64(zlib.deflateSync('@startuml\n' + contents + '\n@enduml').toString('binary'))
+        const zippedCode = encode64(zlib.deflateRawSync('@startuml\n' + contents + '\n@enduml').toString('binary'))
 
         token = state.push('uml_diagram', 'img', 0)
         // alt is constructed from children. No point in populating it here.
-        token.attrs = [ [ 'src', `${server}/${imageFormat}/${zippedCode}` ], [ 'alt', '' ], ['class', 'uml-diagram'] ]
+        token.attrs = [ [ 'src', `${server}/${imageFormat}/${zippedCode}` ], [ 'alt', '' ], ['class', 'uml-diagram prefetch-candidate'] ]
         token.block = true
         token.children = altToken
         token.info = params
