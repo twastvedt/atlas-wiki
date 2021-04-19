@@ -36,7 +36,7 @@ type FeatureMutation {
     title: String
     description: String
     geojson: JSONObject!
-  ): DefaultResponse @auth(requires: ["manage:system", "write:features", "manage:features"])
+  ): FeatureCreateResponse @auth(requires: ["manage:system", "write:features", "manage:features"])
 
   update(
     id: Int!
@@ -72,4 +72,9 @@ type FeatureProperties {
       createdAt: Date!
       updatedAt: Date!
       imagePath: String
+}
+
+type FeatureCreateResponse {
+  responseResult: ResponseStatus
+  id: Int
 }

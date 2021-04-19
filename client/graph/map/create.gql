@@ -6,6 +6,7 @@ mutation ($title: String, $description: String, $geojson: JSONObject!, $parentId
         errorCode
         message
       }
+      id
     }
   }
 }

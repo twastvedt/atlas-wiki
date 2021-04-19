@@ -373,6 +373,7 @@ export default {
         if (!_.get(resp, 'responseResult.succeeded')) {
           throw new Error(_.get(resp, 'responseResult.message'))
         }
+        layer.feature.properties.id = _.get(resp, 'id')
       } catch (err) {
         this.$store.commit('showNotification', {
           message: err.message,

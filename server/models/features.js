@@ -108,7 +108,7 @@ module.exports = class Feature extends Model {
       geojson
     }
 
-    await WIKI.models.features.query().insert(newFeatureData)
+    return WIKI.models.features.query().insert(newFeatureData)
   }
 
   /**

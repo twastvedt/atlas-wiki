@@ -57,10 +57,11 @@ module.exports = {
   FeatureMutation: {
     async create (obj, args) {
       try {
-        await WIKI.models.features.createNewFeature(args)
+        const newFeature = await WIKI.models.features.createNewFeature(args)
 
         return {
-          responseResult: graphHelper.generateSuccess('Feature created successfully')
+          responseResult: graphHelper.generateSuccess('Feature created successfully'),
+          id: newFeature.id
         }
       } catch (err) {
         return graphHelper.generateError(err)
