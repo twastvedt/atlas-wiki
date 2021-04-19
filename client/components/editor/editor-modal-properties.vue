@@ -232,9 +232,6 @@
               persistent-hint
               inset
               )
-        v-tab-item
-          v-card-text.pt-5
-            .overline.pb-5 {{$t('editor:props.pageGeolocation')}}
 
         v-tab-item(:transition='false', :reverse-transition='false')
           .editor-props-codeeditor-title
@@ -243,6 +240,10 @@
             textarea(ref='codecss')
           .editor-props-codeeditor-hint
             .caption {{$t('editor:props.cssHint')}}
+
+        v-tab-item(transition='fade-transition', reverse-transition='fade-transition')
+          v-card-text.pt-5
+            .overline.pb-5 {{$t('editor:props.pageGeolocation')}}
 
     page-selector(:mode='pageSelectorMode', v-model='pageSelectorShown', :path='path', :locale='locale', :open-handler='setPath')
 </template>
